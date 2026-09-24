@@ -366,30 +366,28 @@ export default function HandwritingPad({
       </div>
 
       {/* Footer Actions */}
-      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-800 text-xs">
-        <span className="text-slate-400">
-          💡 Write notes, math, doodles or signatures with finger/stylus
-        </span>
-
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-2.5 pt-2.5 border-t border-slate-800">
+        <p className="text-[11px] text-slate-500 flex-1 hidden sm:block">
+          ✍️ Draw with finger or stylus — touch &amp; pressure ready
+        </p>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition"
+              className="flex-1 sm:flex-none h-11 flex items-center justify-center gap-1.5 px-4 rounded-xl text-sm font-semibold bg-white/[0.05] text-slate-300 hover:bg-white/[0.08] border border-white/[0.08] transition"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
               Cancel
             </button>
           )}
-
           <button
             type="button"
             onClick={handleSave}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium shadow-md transition"
+            className="flex-1 sm:flex-none h-11 flex items-center justify-center gap-1.5 px-5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/25 transition active:scale-[0.98]"
           >
-            <Check className="w-3.5 h-3.5" />
-            Apply Drawing
+            <Check className="w-4 h-4" />
+            Apply
           </button>
         </div>
       </div>

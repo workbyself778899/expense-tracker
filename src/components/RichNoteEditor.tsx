@@ -159,10 +159,10 @@ export default function RichNoteEditor({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-3xl rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="animate-slide-up relative w-full sm:max-w-3xl sm:mx-4 rounded-t-3xl sm:rounded-3xl border border-white/[0.08] bg-[#0f1623] shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="p-2 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
               <FolderOpen className="w-4 h-4" />
@@ -457,12 +457,12 @@ export default function RichNoteEditor({
           </div>
 
           {/* Note Body: Content Editable Area */}
-          <div className="p-5 flex-1 min-h-[220px]">
+          <div className="px-4 sm:px-5 py-3 flex-1 min-h-[180px] sm:min-h-[220px]">
             <div
               ref={editorRef}
               contentEditable
               suppressContentEditableWarning
-              className="note-rich-content w-full min-h-[200px] text-slate-200 text-sm focus:outline-none leading-relaxed p-3 rounded-xl bg-slate-950/40 border border-slate-800/80 focus:border-indigo-500/50 transition"
+              className="note-rich-content w-full min-h-[160px] sm:min-h-[200px] text-slate-100 text-base sm:text-sm focus:outline-none leading-relaxed p-3 rounded-xl bg-white/[0.03] border border-white/[0.07] focus:border-indigo-500/50 transition"
             />
 
             {/* Handwriting / Sketch Attachment Preview */}
@@ -504,17 +504,13 @@ export default function RichNoteEditor({
           </div>
 
           {/* Modal Footer */}
-          <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-800 bg-slate-950/80">
-            <span className="text-xs text-slate-400">
-              Auto-saves to your local database or cloud MongoDB
-            </span>
-
-            <div className="flex items-center gap-2.5">
+          <div className="flex-shrink-0 px-4 sm:px-5 py-3.5 border-t border-white/[0.07] bg-white/[0.02]">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5">
               <button
                 type="button"
                 onClick={onCancel}
                 disabled={isSaving}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition"
+                className="flex-1 h-11 rounded-xl text-sm font-semibold text-slate-400 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] transition disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -522,10 +518,10 @@ export default function RichNoteEditor({
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-indigo-500/25 transition disabled:opacity-50"
+                className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-indigo-500/25 transition disabled:opacity-50 active:scale-[0.98]"
               >
-                <Save className="w-3.5 h-3.5" />
-                {isSaving ? "Saving..." : "Save Note"}
+                <Save className="w-4 h-4" />
+                {isSaving ? "Saving…" : "Save Note"}
               </button>
             </div>
           </div>

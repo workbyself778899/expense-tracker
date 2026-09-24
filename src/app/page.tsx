@@ -9,6 +9,7 @@ import ExpenseModal from "@/components/ExpenseModal";
 import NotesView from "@/components/NotesView";
 import RichNoteEditor from "@/components/RichNoteEditor";
 import AuthView from "@/components/AuthView";
+import RecentTransactions from "@/components/RecentTransactions";
 import { IExpense, INote, IDashboardStats, IUser } from "@/types";
 import { useCurrency } from "@/context/CurrencyContext";
 import {
@@ -385,38 +386,31 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Recent Transactions List */}
+            {/* Recent Transactions */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-white flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-emerald-400" />
-                  <h2 className="text-sm font-bold text-slate-100">
-                    Recent Transactions
-                  </h2>
-                </div>
+                  Recent
+                </h2>
                 <button
                   type="button"
                   onClick={() => setActiveTab("expenses")}
                   className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition"
                 >
-                  <span>View all transactions ({expenses.length})</span>
+                  <span>All ({expenses.length})</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
 
-              <ExpenseList
+              <RecentTransactions
                 expenses={expenses.slice(0, 8)}
                 isLoading={isLoading}
                 onEdit={(tx) => {
                   setEditingExpense(tx);
                   setIsExpenseModalOpen(true);
                 }}
-                onDelete={handleDeleteExpense}
-                onAddNew={() => {
-                  setEditingExpense(null);
-                  setIsExpenseModalOpen(true);
-                }}
-                onViewNote={handleOpenLinkedNote}
+                onViewAll={() => setActiveTab("expenses")}
               />
             </div>
           </div>
