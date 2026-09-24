@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/expense_tracker";
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
+const MONGODB_DB = process.env.MONGODB_DB || process.env.DB_NAME || "expense_tracker";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -27,6 +28,7 @@ export async function connectDB() {
     const opts: mongoose.ConnectOptions = {
       bufferCommands: false,
       serverSelectionTimeoutMS: 5000,
+      dbName: MONGODB_DB,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => {
