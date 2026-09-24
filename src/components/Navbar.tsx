@@ -65,26 +65,26 @@ export default function Navbar({
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/25">
               <Receipt className="w-4 h-4 text-white" />
             </div>
-            <span className="text-sm font-bold text-white tracking-tight hidden sm:block">
+            <span className="text-base font-bold text-white tracking-tight hidden sm:block">
               SpendTrack
             </span>
           </div>
 
           {/* Desktop Nav Pills */}
           {user && (
-            <nav className="hidden md:flex items-center gap-0.5 bg-white/[0.04] p-1 rounded-2xl border border-white/[0.06]">
+            <nav className="hidden md:flex items-center gap-1 bg-white/[0.04] p-1 rounded-2xl border border-white/[0.06]">
               {NAV_TABS.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   type="button"
                   onClick={() => onTabChange(id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-150 ${
                     activeTab === id
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                      : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
+                      ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30"
+                      : "text-slate-300 hover:text-white hover:bg-white/[0.06]"
                   }`}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   {label}
                 </button>
               ))}
@@ -216,7 +216,7 @@ export default function Navbar({
                       <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-blue-400" />
                     )}
                   </div>
-                  <span className={`text-[10px] font-medium leading-none ${isActive ? "text-blue-400" : ""}`}>
+                  <span className={`text-xs font-medium leading-none ${isActive ? "text-blue-400 font-semibold" : ""}`}>
                     {label}
                   </span>
                 </button>
@@ -232,7 +232,7 @@ export default function Navbar({
               <div className="bg-blue-600 rounded-xl p-2 shadow-lg shadow-blue-600/30 active:scale-95 transition-transform">
                 <Plus className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[10px] font-medium text-blue-400 leading-none">Add</span>
+              <span className="text-xs font-medium text-blue-400 leading-none">Add</span>
             </button>
           </div>
         </nav>

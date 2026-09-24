@@ -289,12 +289,12 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-blue-400" />
-                    <h2 className="text-sm font-bold text-slate-100">Analytics</h2>
+                    <h2 className="text-base font-bold text-slate-100">Analytics</h2>
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab("charts")}
-                    className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition"
+                    className="text-sm text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 transition"
                   >
                     <span>View all charts</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -314,14 +314,14 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <StickyNote className="w-4 h-4 text-indigo-400" />
-                    <h2 className="text-sm font-bold text-slate-100">
+                    <h2 className="text-base font-bold text-slate-100">
                       Personal Notes
                     </h2>
                   </div>
                   <button
                     type="button"
                     onClick={() => setActiveTab("notes")}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 transition"
+                    className="text-sm text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1 transition"
                   >
                     <span>All notes ({notes.length})</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -332,14 +332,14 @@ export default function Home() {
                   {notes.length === 0 ? (
                     <div className="text-center py-8">
                       <StickyNote className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-                      <p className="text-xs text-slate-400">No notes created yet</p>
+                      <p className="text-sm text-slate-400">No notes created yet</p>
                       <button
                         type="button"
                         onClick={() => {
                           setEditingNote(null);
                           setIsNoteEditorOpen(true);
                         }}
-                        className="mt-2 text-xs font-medium text-indigo-400 hover:underline"
+                        className="mt-2 text-sm font-semibold text-indigo-400 hover:underline"
                       >
                         + Create your first note
                       </button>
@@ -349,22 +349,22 @@ export default function Home() {
                       <div
                         key={n._id}
                         onClick={() => handleOpenLinkedNote(n._id || "")}
-                        className="p-3 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800/80 hover:border-indigo-500/40 cursor-pointer transition shadow-sm"
+                        className="p-3.5 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800/80 hover:border-indigo-500/40 cursor-pointer transition shadow-sm"
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-800">
                             {n.category}
                           </span>
                           {n.handwritingDataUrl && (
-                            <span className="text-[10px] text-indigo-400 font-medium flex items-center gap-0.5">
+                            <span className="text-xs text-indigo-400 font-medium flex items-center gap-0.5">
                               ✍️ Drawing
                             </span>
                           )}
                         </div>
-                        <h4 className="text-xs font-bold text-slate-200 truncate">
+                        <h4 className="text-sm font-bold text-slate-200 truncate">
                           {n.title}
                         </h4>
-                        <p className="text-[11px] text-slate-400 line-clamp-2 mt-1">
+                        <p className="text-xs text-slate-400 line-clamp-2 mt-1 leading-relaxed">
                           {n.plainText || "Rich formatted note"}
                         </p>
                       </div>
@@ -377,9 +377,9 @@ export default function Home() {
                       setEditingNote(null);
                       setIsNoteEditorOpen(true);
                     }}
-                    className="w-full py-2 rounded-xl text-xs font-semibold text-indigo-300 bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 transition flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-indigo-300 bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/60 transition flex items-center justify-center gap-1.5"
                   >
-                    <Plus className="w-3.5 h-3.5" />
+                    <Plus className="w-4 h-4" />
                     <span>Create New Note</span>
                   </button>
                 </div>
@@ -389,14 +389,14 @@ export default function Home() {
             {/* Recent Transactions */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <Receipt className="w-4 h-4 text-emerald-400" />
-                  Recent
+                  Recent Transactions
                 </h2>
                 <button
                   type="button"
                   onClick={() => setActiveTab("expenses")}
-                  className="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition"
+                  className="text-sm text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 transition"
                 >
                   <span>All ({expenses.length})</span>
                   <ArrowRight className="w-3.5 h-3.5" />

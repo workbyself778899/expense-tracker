@@ -126,8 +126,8 @@ export default function RichNoteEditor({
     setShowHighlightPicker(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!title.trim()) {
       alert("Please give your note a title.");
       return;
@@ -162,44 +162,59 @@ export default function RichNoteEditor({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="animate-slide-up relative w-full sm:max-w-3xl sm:mx-4 rounded-t-3xl sm:rounded-3xl border border-white/[0.08] bg-[#0f1623] shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="p-2 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+        <div className="flex items-center justify-between px-3.5 sm:px-5 py-3 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0 gap-2">
+          {/* Left: Icon & Title */}
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex-shrink-0">
               <FolderOpen className="w-4 h-4" />
             </span>
-            <h2 className="text-base font-semibold text-slate-100">
-              {initialNote?._id ? "Edit Note" : "Create New Note"}
+            <h2 className="text-base font-semibold text-slate-100 truncate">
+              {initialNote?._id ? "Edit Note" : "New Note"}
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Pin Button */}
+          {/* Right: Actions (Cancel, Save Note, Pin) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {/* Cancel Button */}
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSaving}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] transition active:scale-95 disabled:opacity-50"
+            >
+              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
+              <span>Cancel</span>
+            </button>
+
+            {/* Save Note Button */}
+            <button
+              type="button"
+              onClick={() => handleSave()}
+              disabled={isSaving}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-indigo-600/30 transition active:scale-95 disabled:opacity-50"
+            >
+              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span>{isSaving ? "Saving…" : "Save Note"}</span>
+            </button>
+
+            {/* Pin Toggle */}
             <button
               type="button"
               onClick={() => setIsPinned(!isPinned)}
-              className={`p-2 rounded-lg border transition ${
+              className={`p-2 rounded-xl border transition ${
                 isPinned
                   ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
-                  : "bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200"
+                  : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:text-slate-200"
               }`}
               title={isPinned ? "Pinned Note" : "Pin Note"}
             >
               <Pin className="w-4 h-4" />
             </button>
-
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={onCancel}
-              className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition border border-slate-700"
-            >
-              <X className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto">
+        <form onSubmit={handleSave} className="flex flex-col flex-1 overflow-y-auto">
           {/* Title & Metadata Bar */}
           <div className="p-5 pb-3 space-y-3">
             <input

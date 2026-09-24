@@ -119,43 +119,45 @@ export default function QuickStats({ stats, isLoading = false }: QuickStatsProps
 
       {/* ── Hero Card (full-width) ── */}
       <div
-        className={`relative w-full text-left p-4 sm:p-5 rounded-2xl border bg-gradient-to-br ${hero.heroColor} ${hero.heroBorder} overflow-hidden transition-all duration-300`}
+        className={`relative w-full text-left p-4 sm:p-5 rounded-2xl border bg-gradient-to-br ${hero.heroColor} ${hero.heroBorder} overflow-hidden transition-all duration-300 shadow-xl`}
       >
         {/* Decorative glow */}
-        <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-10 blur-2xl pointer-events-none ${hero.heroGlow}`} />
+        <div className={`absolute -top-8 -right-8 w-28 h-28 rounded-full opacity-15 blur-2xl pointer-events-none ${hero.heroGlow}`} />
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <span className={`text-[11px] font-bold uppercase tracking-widest ${hero.heroAccent}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider ${hero.heroAccent}`}>
               {hero.label}
             </span>
-            <div className={`text-3xl sm:text-4xl font-extrabold tracking-tight font-mono leading-none mt-1 ${hero.heroText}`}>
+            <div className={`text-3xl sm:text-4xl font-extrabold tracking-tight font-mono leading-none mt-1.5 ${hero.heroText}`}>
               {hero.value}
             </div>
-            <p className="text-xs text-slate-400 mt-1.5 truncate">{hero.sub}</p>
+            <p className="text-sm text-slate-300 font-medium mt-2 truncate">{hero.sub}</p>
 
             {/* Savings progress bar inside hero when savings is selected */}
             {hero.id === "savings" && (
-              <div className="w-full bg-white/[0.06] rounded-full h-1 mt-2.5 overflow-hidden max-w-xs">
+              <div className="w-full bg-white/[0.08] rounded-full h-1.5 mt-3 overflow-hidden max-w-xs">
                 <div
-                  className="h-1 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-700"
+                  className="h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 transition-all duration-700"
                   style={{ width: savingsWidth }}
                 />
               </div>
             )}
           </div>
 
-          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border flex-shrink-0 ${hero.iconBg}`}>
-            <hero.icon className="w-5 h-5" />
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border flex-shrink-0 ${hero.iconBg}`}>
+            <hero.icon className="w-6 h-6" />
           </div>
         </div>
 
         {/* Hint */}
-        <p className="text-[10px] text-slate-600 mt-3">Tap any card below to focus it here</p>
+        <p className="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
+          <span>👆</span> Tap any card below to promote it here
+        </p>
       </div>
 
       {/* ── Sub-Cards Grid (the other 3, always visible, clickable) ── */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
         {subCards.map((card) => {
           const Icon = card.icon;
           return (
@@ -166,25 +168,25 @@ export default function QuickStats({ stats, isLoading = false }: QuickStatsProps
               className={`text-left p-3 sm:p-4 rounded-2xl bg-white/[0.03] border ${card.cardBorder} transition-all duration-200 active:scale-[0.97] group`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-wider leading-tight">
+                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider leading-tight">
                   {card.label.split(" ").pop()}
                 </span>
-                <span className={`w-6 h-6 rounded-lg flex items-center justify-center border flex-shrink-0 ${card.iconBg}`}>
-                  <Icon className="w-3 h-3" />
+                <span className={`w-7 h-7 rounded-xl flex items-center justify-center border flex-shrink-0 ${card.iconBg}`}>
+                  <Icon className="w-3.5 h-3.5" />
                 </span>
               </div>
-              <div className={`text-base sm:text-lg font-extrabold font-mono leading-none truncate ${card.cardValueColor}`}>
+              <div className={`text-base sm:text-xl font-extrabold font-mono leading-none truncate ${card.cardValueColor}`}>
                 {card.value}
               </div>
               {card.id === "savings" && (
-                <div className="w-full bg-white/[0.06] rounded-full h-0.5 mt-2 overflow-hidden">
+                <div className="w-full bg-white/[0.08] rounded-full h-1 mt-2.5 overflow-hidden">
                   <div
-                    className="h-0.5 rounded-full bg-indigo-500 transition-all duration-500"
+                    className="h-1 rounded-full bg-indigo-500 transition-all duration-500"
                     style={{ width: savingsWidth }}
                   />
                 </div>
               )}
-              <p className="text-[10px] text-slate-600 mt-1 truncate">{card.sub}</p>
+              <p className="text-xs text-slate-400 mt-1.5 truncate">{card.sub}</p>
             </button>
           );
         })}

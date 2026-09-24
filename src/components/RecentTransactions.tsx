@@ -101,36 +101,36 @@ export default function RecentTransactions({
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold text-white truncate leading-tight">{tx.title}</span>
+                <span className="text-base font-semibold text-white truncate leading-tight">{tx.title}</span>
               </div>
-              <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
+              <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
                 <span>{dateStr}</span>
                 <span>·</span>
-                <span className="flex items-center gap-0.5">
+                <span className="flex items-center gap-1">
                   {paymentIcon(tx.paymentMethod)}
-                  <span className="truncate max-w-[80px]">{payDisplay}</span>
+                  <span className="truncate max-w-[100px]">{payDisplay}</span>
                 </span>
               </div>
             </div>
 
             {/* Amount */}
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2.5 flex-shrink-0">
               <div className="text-right">
-                <div className={`text-sm font-bold font-mono leading-tight ${
+                <div className={`text-base font-bold font-mono leading-tight ${
                   isIncome ? "text-emerald-400" : "text-rose-400"
                 }`}>
                   {isIncome ? "+" : "−"}{formatAmount(tx.amount)}
                 </div>
-                <div className="text-[10px] text-slate-500 text-right truncate max-w-[64px]">
+                <div className="text-xs text-slate-400 text-right truncate max-w-[80px]">
                   {tx.category}
                 </div>
               </div>
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${
                 isIncome ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"
               }`}>
                 {isIncome
-                  ? <ArrowUpRight className="w-3.5 h-3.5" />
-                  : <ArrowDownRight className="w-3.5 h-3.5" />}
+                  ? <ArrowUpRight className="w-4 h-4" />
+                  : <ArrowDownRight className="w-4 h-4" />}
               </div>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function RecentTransactions({
       <button
         type="button"
         onClick={onViewAll}
-        className="w-full flex items-center justify-center gap-1.5 py-3 rounded-2xl text-xs font-semibold text-slate-400 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] hover:border-white/[0.10] transition mt-1"
+        className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] hover:border-white/[0.12] transition mt-1 shadow-sm"
       >
         <MoreHorizontal className="w-4 h-4" />
         View all transactions
