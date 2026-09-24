@@ -18,6 +18,7 @@ import {
   Trash2,
   Tag,
   FolderOpen,
+  Edit2,
 } from "lucide-react";
 import { INote, NoteCategory } from "@/types";
 import HandwritingPad from "./HandwritingPad";
@@ -162,41 +163,17 @@ export default function RichNoteEditor({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
       <div className="animate-slide-up relative w-full sm:max-w-3xl sm:mx-4 rounded-t-3xl sm:rounded-3xl border border-white/[0.08] bg-[#0f1623] shadow-2xl flex flex-col max-h-[94vh] sm:max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-3.5 sm:px-5 py-3 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0 gap-2">
-          {/* Left: Icon & Title */}
-          <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center justify-between px-4 sm:px-5 py-3.5 border-b border-white/[0.08] bg-[#0f1623] relative z-30 flex-shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
             <span className="p-2 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex-shrink-0">
               <FolderOpen className="w-4 h-4" />
             </span>
-            <h2 className="text-base font-semibold text-slate-100 truncate">
+            <h2 className="text-base font-bold text-slate-100 truncate">
               {initialNote?._id ? "Edit Note" : "New Note"}
             </h2>
           </div>
 
-          {/* Right: Actions (Cancel, Save Note, Pin) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            {/* Cancel Button */}
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={isSaving}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-medium text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] transition active:scale-95 disabled:opacity-50"
-            >
-              <X className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
-              <span>Cancel</span>
-            </button>
-
-            {/* Save Note Button */}
-            <button
-              type="button"
-              onClick={() => handleSave()}
-              disabled={isSaving}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-indigo-600/30 transition active:scale-95 disabled:opacity-50"
-            >
-              <Save className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              <span>{isSaving ? "Saving…" : "Save Note"}</span>
-            </button>
-
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* Pin Toggle */}
             <button
               type="button"
@@ -210,11 +187,21 @@ export default function RichNoteEditor({
             >
               <Pin className="w-4 h-4" />
             </button>
+
+            {/* Close (X) Button */}
+            <button
+              type="button"
+              onClick={onCancel}
+              className="p-2 rounded-xl bg-white/[0.04] text-slate-400 hover:text-slate-200 hover:bg-white/[0.08] transition border border-white/[0.08]"
+              title="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSave} className="flex flex-col flex-1 overflow-y-auto">
+        <form id="note-form" onSubmit={handleSave} className="flex flex-col flex-1 overflow-y-auto pb-6">
           {/* Title & Metadata Bar */}
           <div className="p-5 pb-3 space-y-3">
             <input
@@ -488,21 +475,24 @@ export default function RichNoteEditor({
                     <PenTool className="w-3.5 h-3.5 text-indigo-400" />
                     Handwritten Sketch / Drawing Attachment:
                   </span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => setShowHandwritingModal(true)}
-                      className="text-xs text-blue-400 hover:underline"
+                      className="p-1.5 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 transition flex items-center gap-1 text-xs"
+                      title="Edit Sketch"
                     >
-                      Edit Drawing
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Edit</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setHandwritingData(undefined)}
-                      className="text-xs text-rose-400 hover:underline flex items-center gap-0.5"
+                      className="p-1.5 rounded-lg bg-rose-950/60 text-rose-400 hover:bg-rose-900/60 border border-rose-800/40 transition flex items-center gap-1 text-xs"
+                      title="Remove Sketch"
                     >
-                      <Trash2 className="w-3 h-3" />
-                      Remove
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Remove</span>
                     </button>
                   </div>
                 </div>
@@ -517,30 +507,32 @@ export default function RichNoteEditor({
               </div>
             )}
           </div>
-
-          {/* Modal Footer */}
-          <div className="flex-shrink-0 px-4 sm:px-5 py-3.5 border-t border-white/[0.07] bg-white/[0.02]">
-            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-2.5">
-              <button
-                type="button"
-                onClick={onCancel}
-                disabled={isSaving}
-                className="flex-1 h-11 rounded-xl text-sm font-semibold text-slate-400 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] transition disabled:opacity-50"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="flex-1 h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-indigo-500/25 transition disabled:opacity-50 active:scale-[0.98]"
-              >
-                <Save className="w-4 h-4" />
-                {isSaving ? "Saving…" : "Save Note"}
-              </button>
-            </div>
-          </div>
         </form>
+
+        {/* Footer - Save Note & Cancel Buttons with Icons */}
+        <div className="flex-shrink-0 px-4 sm:px-5 py-3.5 border-t border-white/[0.08] bg-[#0f1623] relative z-30">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSaving}
+              className="h-11 flex-1 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-slate-300 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] transition active:scale-[0.98] disabled:opacity-50"
+            >
+              <X className="w-4 h-4 text-slate-400" />
+              <span>Cancel</span>
+            </button>
+
+            <button
+              type="submit"
+              form="note-form"
+              disabled={isSaving}
+              className="h-11 flex-1 flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-indigo-600/30 transition active:scale-[0.98] disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              <span>{isSaving ? "Saving…" : "Save Note"}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Handwriting Canvas Modal */}
