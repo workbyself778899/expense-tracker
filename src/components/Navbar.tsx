@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   LayoutDashboard,
   Receipt,
@@ -9,8 +9,11 @@ import {
   Plus,
   LogOut,
   User as UserIcon,
+  Coins,
+  ChevronDown,
 } from "lucide-react";
 import { IUser } from "@/types";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface NavbarProps {
   user: IUser | null;
@@ -21,6 +24,13 @@ interface NavbarProps {
   onLogout: () => Promise<void>;
 }
 
+const NAV_TABS = [
+  { id: "overview" as const, label: "Overview", icon: LayoutDashboard },
+  { id: "expenses" as const, label: "Expenses", icon: Receipt },
+  { id: "charts" as const, label: "Analytics", icon: PieChart },
+  { id: "notes" as const, label: "Notes", icon: StickyNote },
+] as const;
+
 export default function Navbar({
   user,
   activeTab,
@@ -30,224 +40,202 @@ export default function Navbar({
   onLogout,
 }: NavbarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const { currency, setIsCurrencyModalOpen } = useCurrency();
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    if (showUserMenu) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showUserMenu]);
 
   return (
     <>
-      {/* Top Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center">
-              <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-blue-400" />
-              </div>
+      {/* ── Top Header ── */}
+      <header className="sticky top-0 z-40 w-full border-b border-white/[0.06] bg-[#080c14]/90 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
+
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/25">
+              <Receipt className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-                  Expense Tracker
-                </h1>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  Personal
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-500 hidden sm:block">
-                Secure Financial Hub & Rich Notes
-              </p>
-            </div>
+            <span className="text-sm font-bold text-white tracking-tight hidden sm:block">
+              SpendTrack
+            </span>
           </div>
 
-          {/* Desktop Navigation Links */}
+          {/* Desktop Nav Pills */}
           {user && (
-            <nav className="hidden md:flex items-center gap-1 bg-slate-900/90 p-1 rounded-2xl border border-slate-800/80">
-              <button
-                type="button"
-                onClick={() => onTabChange("overview")}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-                  activeTab === "overview"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Overview</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onTabChange("expenses")}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-                  activeTab === "expenses"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <Receipt className="w-4 h-4" />
-                <span>Transactions</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onTabChange("charts")}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-                  activeTab === "charts"
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <PieChart className="w-4 h-4" />
-                <span>Analytics</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => onTabChange("notes")}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition ${
-                  activeTab === "notes"
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <StickyNote className="w-4 h-4" />
-                <span>Notes & Draw</span>
-              </button>
+            <nav className="hidden md:flex items-center gap-0.5 bg-white/[0.04] p-1 rounded-2xl border border-white/[0.06]">
+              {NAV_TABS.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onTabChange(id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                    activeTab === id
+                      ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                      : "text-slate-400 hover:text-white hover:bg-white/[0.06]"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                </button>
+              ))}
             </nav>
           )}
 
-          {/* Right Action buttons */}
+          {/* Right Actions */}
           <div className="flex items-center gap-2">
             {user ? (
               <>
-                {/* Add Note Button */}
+                {/* Currency Badge */}
                 <button
                   type="button"
-                  onClick={onOpenNewNote}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-indigo-300 bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-700/50 shadow transition"
+                  onClick={() => setIsCurrencyModalOpen(true)}
+                  className="flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 hover:border-amber-500/35 transition-all"
+                  title="Change currency"
                 >
-                  <StickyNote className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Note</span>
+                  <Coins className="w-3 h-3" />
+                  <span>{currency}</span>
                 </button>
 
-                {/* Add Expense Button */}
+                {/* Add Expense — prominent CTA */}
                 <button
                   type="button"
                   onClick={onOpenNewExpense}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-500/25 transition"
+                  className="flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 transition-all active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Add Expense</span>
+                  <span className="hidden sm:inline">Add</span>
                 </button>
 
-                {/* User Menu Dropdown */}
-                <div className="relative ml-1">
+                {/* User Avatar Menu */}
+                <div className="relative" ref={menuRef}>
                   <button
                     type="button"
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-2 p-1.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition"
-                    title={user.name}
+                    onClick={() => setShowUserMenu((v) => !v)}
+                    className="flex items-center gap-1.5 h-8 px-2 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition"
                   >
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-xs font-bold text-white shadow">
+                    <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-[11px] font-bold text-white">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-xs font-medium text-slate-200 hidden lg:inline max-w-[100px] truncate">
-                      {user.name}
-                    </span>
+                    <ChevronDown className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${showUserMenu ? "rotate-180" : ""}`} />
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-slate-900 border border-slate-800 p-2 shadow-2xl z-50">
-                      <div className="px-3 py-2 border-b border-slate-800 mb-1">
-                        <p className="text-xs font-semibold text-slate-200 truncate">
-                          {user.name}
-                        </p>
-                        <p className="text-[11px] text-slate-400 truncate">
-                          {user.email}
-                        </p>
+                    <div className="animate-scale-in absolute right-0 top-full mt-2 w-52 rounded-2xl bg-[#111827] border border-white/[0.08] shadow-2xl z-50 overflow-hidden">
+                      {/* User Info */}
+                      <div className="px-4 py-3 border-b border-white/[0.06]">
+                        <p className="text-xs font-semibold text-white truncate">{user.name}</p>
+                        <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
                       </div>
 
+                      {/* Note shortcut */}
                       <button
                         type="button"
-                        onClick={async () => {
-                          setShowUserMenu(false);
-                          await onLogout();
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-rose-400 hover:bg-rose-950/40 transition"
+                        onClick={() => { setShowUserMenu(false); onOpenNewNote(); }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.06] transition text-left"
                       >
-                        <LogOut className="w-3.5 h-3.5" />
-                        <span>Sign Out</span>
+                        <StickyNote className="w-3.5 h-3.5 text-indigo-400" />
+                        New Note
                       </button>
+
+                      {/* Currency */}
+                      <button
+                        type="button"
+                        onClick={() => { setShowUserMenu(false); setIsCurrencyModalOpen(true); }}
+                        className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-slate-300 hover:bg-white/[0.06] transition"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Coins className="w-3.5 h-3.5 text-amber-400" />
+                          Currency
+                        </div>
+                        <span className="font-mono font-bold text-amber-400 text-[11px]">{currency}</span>
+                      </button>
+
+                      <div className="border-t border-white/[0.06]">
+                        <button
+                          type="button"
+                          onClick={async () => { setShowUserMenu(false); await onLogout(); }}
+                          className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-rose-400 hover:bg-rose-500/10 transition"
+                        >
+                          <LogOut className="w-3.5 h-3.5" />
+                          Sign out
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                <UserIcon className="w-3.5 h-3.5 text-slate-500" />
-                <span>Personal Account</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCurrencyModalOpen(true)}
+                  className="flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-mono font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/15 transition"
+                >
+                  <Coins className="w-3 h-3" />
+                  {currency}
+                </button>
+                <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <UserIcon className="w-3.5 h-3.5" />
+                </div>
               </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* Mobile Bottom Navigation Dock */}
+      {/* ── Mobile Bottom Navigation ── */}
       {user && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 px-3 py-2">
-          <div className="flex items-center justify-around">
-            <button
-              type="button"
-              onClick={() => onTabChange("overview")}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
-                activeTab === "overview"
-                  ? "text-blue-400 font-semibold"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              <LayoutDashboard className="w-5 h-5" />
-              <span className="text-[10px]">Overview</span>
-            </button>
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/[0.06] bg-[#080c14]/95 backdrop-blur-xl pb-safe">
+          <div className="flex items-center justify-around px-2 pt-2 pb-1">
+            {NAV_TABS.map(({ id, label, icon: Icon }) => {
+              const isActive = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onTabChange(id)}
+                  className={`flex flex-col items-center gap-1 flex-1 py-1.5 rounded-xl transition-all duration-150 ${
+                    isActive
+                      ? "text-blue-400"
+                      : "text-slate-500 hover:text-slate-300 active:text-white"
+                  }`}
+                >
+                  <div className={`relative p-1.5 rounded-xl transition-all ${isActive ? "bg-blue-500/15" : ""}`}>
+                    <Icon className="w-5 h-5" />
+                    {isActive && (
+                      <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-blue-400" />
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-medium leading-none ${isActive ? "text-blue-400" : ""}`}>
+                    {label}
+                  </span>
+                </button>
+              );
+            })}
 
+            {/* Quick Add FAB in bottom nav */}
             <button
               type="button"
-              onClick={() => onTabChange("expenses")}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
-                activeTab === "expenses"
-                  ? "text-blue-400 font-semibold"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
+              onClick={onOpenNewExpense}
+              className="flex flex-col items-center gap-1 flex-1 py-1.5"
             >
-              <Receipt className="w-5 h-5" />
-              <span className="text-[10px]">Expenses</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onTabChange("charts")}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
-                activeTab === "charts"
-                  ? "text-blue-400 font-semibold"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              <PieChart className="w-5 h-5" />
-              <span className="text-[10px]">Charts</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onTabChange("notes")}
-              className={`flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition ${
-                activeTab === "notes"
-                  ? "text-indigo-400 font-semibold"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              <StickyNote className="w-5 h-5" />
-              <span className="text-[10px]">Notes</span>
+              <div className="bg-blue-600 rounded-xl p-2 shadow-lg shadow-blue-600/30 active:scale-95 transition-transform">
+                <Plus className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-[10px] font-medium text-blue-400 leading-none">Add</span>
             </button>
           </div>
-        </div>
+        </nav>
       )}
     </>
   );

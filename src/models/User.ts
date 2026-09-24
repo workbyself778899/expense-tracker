@@ -4,6 +4,7 @@ export interface IUserDocument extends Document {
   name: string;
   email: string;
   password: string;
+  currency?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,11 @@ const UserSchema = new Schema<IUserDocument>(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
+    },
+    currency: {
+      type: String,
+      default: "NRP",
+      trim: true,
     },
   },
   {

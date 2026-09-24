@@ -14,7 +14,8 @@ A modern, full-stack **Expense Tracker** built with **Next.js (App Router)**, **
 ### 📊 Expense & Income Tracking
 - **Income & Expense Management**: Easily record, edit, and delete transactions with amounts, categories, dates, tags, and notes.
 - **Categorization**: Food & Dining, Transportation, Housing & Rent, Utilities, Entertainment, Shopping, Health & Fitness, Education, Salary, Freelance & Business, Investments, and more.
-- **Payment Channels**: Cash, Credit Card, Debit Card, Online / UPI, Bank Transfer.
+- **Payment Channels**: Cash, Credit Card, Debit Card, e-Sewa / Wallet, Bank Transfer, Crypto / Other.
+- **Dynamic Multi-Currency Switcher**: Easily switch currencies on the fly (NRP, INR, NPR रू, INR ₹, USD $, EUR €, GBP £, or custom currency symbol/code).
 - **Link Notes to Expenses**: Connect your receipts, grocery checklists, or tax notes directly to transactions.
 - **Search, Filter & Sort**: Real-time filtering by category, transaction type, date ranges, and full-text keyword search.
 

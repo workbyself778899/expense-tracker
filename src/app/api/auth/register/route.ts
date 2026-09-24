@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
+          currency: user.currency || "NRP",
         },
         message: "Account created successfully",
       },

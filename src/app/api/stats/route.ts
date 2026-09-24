@@ -90,7 +90,10 @@ export async function GET(req: NextRequest) {
       }
 
       // Payment method breakdown
-      const method = tx.paymentMethod || "Cash";
+      let method = tx.paymentMethod || "Cash";
+      if (method === "Online / UPI") {
+        method = "e-Sewa / Wallet";
+      }
       if (!paymentTotals[method]) {
         paymentTotals[method] = { amount: 0, count: 0 };
       }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { CurrencyProvider } from "@/context/CurrencyContext";
+import CurrencyModal from "@/components/CurrencyModal";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +34,10 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-[#090d16] text-slate-100"
       >
-        {children}
+        <CurrencyProvider>
+          {children}
+          <CurrencyModal />
+        </CurrencyProvider>
       </body>
     </html>
   );

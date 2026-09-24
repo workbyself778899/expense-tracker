@@ -10,6 +10,7 @@ import NotesView from "@/components/NotesView";
 import RichNoteEditor from "@/components/RichNoteEditor";
 import AuthView from "@/components/AuthView";
 import { IExpense, INote, IDashboardStats, IUser } from "@/types";
+import { useCurrency } from "@/context/CurrencyContext";
 import {
   ArrowRight,
   TrendingUp,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 
 export default function Home() {
+  const { syncUserCurrency } = useCurrency();
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [activeTab, setActiveTab] = useState<"overview" | "expenses" | "charts" | "notes">("overview");
@@ -45,6 +47,9 @@ export default function Home() {
       const data = await res.json();
       if (data.success && data.user) {
         setCurrentUser(data.user);
+        if (data.user.currency) {
+          syncUserCurrency(data.user.currency);
+        }
       } else {
         setCurrentUser(null);
       }
@@ -53,7 +58,7 @@ export default function Home() {
     } finally {
       setAuthChecked(true);
     }
-  }, []);
+  }, [syncUserCurrency]);
 
   useEffect(() => {
     checkUserSession();
@@ -219,21 +224,14 @@ export default function Home() {
     );
   }
 
-  // If user is not authenticated, show modern Login / Register view
+  // If user is not authenticated, show Login / Register view
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col">
-        <Navbar
-          user={null}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onOpenNewExpense={() => {}}
-          onOpenNewNote={() => {}}
-          onLogout={handleLogout}
-        />
+      <div className="min-h-screen bg-[#080c14] text-slate-100">
         <AuthView
           onSuccess={(user) => {
             setCurrentUser(user);
+            if (user.currency) syncUserCurrency(user.currency);
           }}
         />
       </div>
@@ -241,7 +239,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col pb-20 md:pb-12">
+    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col pb-24 md:pb-8">
       {/* Top Navigation */}
       <Navbar
         user={currentUser}
@@ -290,9 +288,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-blue-400" />
-                    <h2 className="text-sm font-bold text-slate-100">
-                      Personal Expense & Cashflow Analytics
-                    </h2>
+                    <h2 className="text-sm font-bold text-slate-100">Analytics</h2>
                   </div>
                   <button
                     type="button"
@@ -429,17 +425,6 @@ export default function Home() {
         {/* TAB 2: TRANSACTIONS / EXPENSES */}
         {activeTab === "expenses" && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-slate-100">
-                  Transactions & Expense History
-                </h2>
-                <p className="text-xs text-slate-400">
-                  Manage all personal income and expenses with search, categories, and date filters
-                </p>
-              </div>
-            </div>
-
             <ExpenseList
               expenses={expenses}
               isLoading={isLoading}
@@ -460,15 +445,6 @@ export default function Home() {
         {/* TAB 3: CHARTS & ANALYTICS */}
         {activeTab === "charts" && (
           <div className="space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-slate-100">
-                Visual Analytics & Multiple Charts
-              </h2>
-              <p className="text-xs text-slate-400">
-                Detailed breakdowns of your personal spending trends, category distribution, cash flow, and payment channels
-              </p>
-            </div>
-
             <ChartsView
               stats={stats}
               timeRange={timeRange}
@@ -481,18 +457,6 @@ export default function Home() {
         {/* TAB 4: NOTES & HANDWRITING */}
         {activeTab === "notes" && (
           <div className="space-y-4">
-            <div>
-              <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                <span>Personal Rich Notes & Mobile Handwriting</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                  H1/H2 • Bold • Colors • Canvas
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400">
-                Private notes with single-line formatting toolbar (H1, H2, Bold, Italic, Underline, Colors) or freehand handwriting sketches.
-              </p>
-            </div>
-
             <NotesView
               notes={notes}
               isLoading={isLoading}

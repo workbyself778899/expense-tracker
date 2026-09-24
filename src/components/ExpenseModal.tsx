@@ -3,57 +3,43 @@
 import React, { useState } from "react";
 import {
   X,
-  PlusCircle,
-  Calendar,
-  CreditCard,
   DollarSign,
-  Tag,
-  FileText,
-  Utensils,
-  Car,
-  Home,
-  Zap,
-  Film,
-  ShoppingBag,
-  HeartPulse,
-  GraduationCap,
-  Plane,
-  Briefcase,
-  TrendingUp,
-  Gift,
-  HelpCircle,
+  Utensils, Car, Home, Zap, Film, ShoppingBag,
+  HeartPulse, GraduationCap, Plane, Briefcase,
+  TrendingUp, Gift, HelpCircle, PlusCircle,
 } from "lucide-react";
 import { IExpense, TransactionType, INote } from "@/types";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface ExpenseModalProps {
   initialExpense?: Partial<IExpense> | null;
   notesList?: INote[];
-  onSave: (expenseData: Partial<IExpense>) => Promise<void>;
+  onSave: (data: Partial<IExpense>) => Promise<void>;
   onCancel: () => void;
 }
 
-const CATEGORIES: { label: string; icon: React.ElementType; type: "both" | "expense" | "income" }[] = [
-  { label: "Food & Dining", icon: Utensils, type: "expense" },
-  { label: "Transportation", icon: Car, type: "expense" },
-  { label: "Housing & Rent", icon: Home, type: "expense" },
-  { label: "Utilities & Bills", icon: Zap, type: "expense" },
-  { label: "Entertainment", icon: Film, type: "expense" },
-  { label: "Shopping", icon: ShoppingBag, type: "expense" },
-  { label: "Health & Fitness", icon: HeartPulse, type: "expense" },
-  { label: "Education", icon: GraduationCap, type: "expense" },
-  { label: "Travel", icon: Plane, type: "expense" },
-  { label: "Salary", icon: Briefcase, type: "income" },
-  { label: "Freelance & Business", icon: TrendingUp, type: "income" },
-  { label: "Investments", icon: TrendingUp, type: "both" },
-  { label: "Gifts & Donations", icon: Gift, type: "both" },
-  { label: "Other", icon: HelpCircle, type: "both" },
-];
+const CATEGORIES = [
+  { label: "Food & Dining",        icon: Utensils,      type: "expense" },
+  { label: "Transportation",       icon: Car,           type: "expense" },
+  { label: "Housing & Rent",       icon: Home,          type: "expense" },
+  { label: "Utilities & Bills",    icon: Zap,           type: "expense" },
+  { label: "Entertainment",        icon: Film,          type: "expense" },
+  { label: "Shopping",             icon: ShoppingBag,   type: "expense" },
+  { label: "Health & Fitness",     icon: HeartPulse,    type: "expense" },
+  { label: "Education",            icon: GraduationCap, type: "expense" },
+  { label: "Travel",               icon: Plane,         type: "expense" },
+  { label: "Salary",               icon: Briefcase,     type: "income"  },
+  { label: "Freelance & Business", icon: TrendingUp,    type: "income"  },
+  { label: "Investments",          icon: TrendingUp,    type: "both"    },
+  { label: "Gifts & Donations",    icon: Gift,          type: "both"    },
+  { label: "Other",                icon: HelpCircle,    type: "both"    },
+] as const;
 
 const PAYMENT_METHODS = [
   "Cash",
-  "Credit Card",
+  "e-Sewa / Wallet",
   "Debit Card",
-  "Online / UPI",
+  "Credit Card",
   "Bank Transfer",
   "Crypto / Other",
 ];
@@ -64,13 +50,16 @@ export default function ExpenseModal({
   onSave,
   onCancel,
 }: ExpenseModalProps) {
-  const [type, setType] = useState<TransactionType>(initialExpense?.type || "expense");
-  const [title, setTitle] = useState(initialExpense?.title || "");
-  const [amount, setAmount] = useState<string>(
+  const { currency } = useCurrency();
+  const isEdit = !!initialExpense?._id;
+
+  const [type, setType] = useState<TransactionType>(initialExpense?.type ?? "expense");
+  const [title, setTitle] = useState(initialExpense?.title ?? "");
+  const [amount, setAmount] = useState(
     initialExpense?.amount !== undefined ? String(initialExpense.amount) : ""
   );
   const [category, setCategory] = useState(
-    initialExpense?.category || (type === "income" ? "Salary" : "Food & Dining")
+    initialExpense?.category ?? (initialExpense?.type === "income" ? "Salary" : "Food & Dining")
   );
   const [date, setDate] = useState(
     initialExpense?.date
@@ -78,306 +67,259 @@ export default function ExpenseModal({
       : new Date().toISOString().split("T")[0]
   );
   const [paymentMethod, setPaymentMethod] = useState(
-    initialExpense?.paymentMethod || "Credit Card"
+    initialExpense?.paymentMethod === "Online / UPI"
+      ? "e-Sewa / Wallet"
+      : (initialExpense?.paymentMethod ?? "Cash")
   );
-  const [notes, setNotes] = useState(initialExpense?.notes || "");
-  const [tagsInput, setTagsInput] = useState(
-    initialExpense?.tags ? initialExpense.tags.join(", ") : ""
-  );
-  const [linkedNoteId, setLinkedNoteId] = useState(
-    initialExpense?.linkedNoteId || ""
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notes, setNotes] = useState(initialExpense?.notes ?? "");
+  const [tags, setTags] = useState(initialExpense?.tags?.join(", ") ?? "");
+  const [linkedNoteId, setLinkedNoteId] = useState(initialExpense?.linkedNoteId ?? "");
+  const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<{ title?: string; amount?: string }>({});
 
-  // Filter categories based on transaction type
+  const isExpense = type === "expense";
   const availableCategories = CATEGORIES.filter(
     (c) => c.type === "both" || c.type === type
   );
 
+  const validate = () => {
+    const e: typeof errors = {};
+    if (!title.trim()) e.title = "Title is required";
+    const n = parseFloat(amount);
+    if (!amount || isNaN(n) || n <= 0) e.amount = "Enter a valid amount";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const numAmount = parseFloat(amount);
-    if (!title.trim()) {
-      alert("Please enter a title");
-      return;
-    }
-    if (isNaN(numAmount) || numAmount <= 0) {
-      alert("Please enter a valid positive amount");
-      return;
-    }
-
-    const tags = tagsInput
-      .split(",")
-      .map((t) => t.trim())
-      .filter((t) => t.length > 0);
-
-    setIsSubmitting(true);
+    if (!validate()) return;
+    setSaving(true);
     try {
       await onSave({
         title: title.trim(),
-        amount: numAmount,
+        amount: parseFloat(amount),
         type,
         category,
         date: new Date(date).toISOString(),
         paymentMethod,
-        notes: notes.trim(),
-        tags,
-        linkedNoteId: linkedNoteId ? linkedNoteId : undefined,
+        notes: notes.trim() || undefined,
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        linkedNoteId: linkedNoteId || undefined,
       });
     } finally {
-      setIsSubmitting(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-lg rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/60">
-          <div className="flex items-center gap-2">
-            <span
-              className={`p-2 rounded-lg border ${
-                type === "expense"
-                  ? "bg-rose-500/20 text-rose-400 border-rose-500/30"
-                  : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-              }`}
-            >
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm"
+      onClick={(e) => e.target === e.currentTarget && onCancel()}
+    >
+      {/* Sheet — slides up on mobile, centered modal on desktop */}
+      <div className="animate-slide-up w-full sm:max-w-lg sm:mx-4 rounded-t-3xl sm:rounded-3xl bg-[#0f1623] border border-white/[0.08] shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh]">
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.06] flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+              isExpense ? "bg-rose-500/15 text-rose-400" : "bg-emerald-500/15 text-emerald-400"
+            }`}>
               <DollarSign className="w-4 h-4" />
-            </span>
-            <h2 className="text-base font-semibold text-slate-100">
-              {initialExpense?._id
-                ? "Edit Transaction"
-                : type === "expense"
-                ? "Add New Expense"
-                : "Add New Income"}
+            </div>
+            <h2 className="text-sm font-bold text-white">
+              {isEdit ? "Edit Transaction" : isExpense ? "New Expense" : "New Income"}
             </h2>
           </div>
-
           <button
             type="button"
             onClick={onCancel}
-            className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition border border-slate-700"
+            className="w-8 h-8 flex items-center justify-center rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.08] transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Modal Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto p-5 space-y-4">
-          {/* Expense vs Income Type Toggle */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-950/80 rounded-xl border border-slate-800">
-            <button
-              type="button"
-              onClick={() => {
-                setType("expense");
-                if (category === "Salary" || category === "Freelance & Business") {
-                  setCategory("Food & Dining");
-                }
-              }}
-              className={`py-2 text-xs font-semibold rounded-lg transition ${
-                type === "expense"
-                  ? "bg-rose-600 text-white shadow-md shadow-rose-900/30"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              💸 Expense
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setType("income");
-                setCategory("Salary");
-              }}
-              className={`py-2 text-xs font-semibold rounded-lg transition ${
-                type === "income"
-                  ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/30"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              💰 Income
-            </button>
-          </div>
+        {/* ── Form ── */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto">
+          <div className="px-5 pt-4 pb-2 space-y-4">
 
-          {/* Title & Amount */}
-          <div className="space-y-3">
+            {/* Type toggle */}
+            <div className="grid grid-cols-2 gap-2 p-1 bg-white/[0.04] rounded-2xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setType("expense");
+                  if (category === "Salary" || category === "Freelance & Business") setCategory("Food & Dining");
+                }}
+                className={`h-10 rounded-xl text-sm font-semibold transition-all ${
+                  isExpense
+                    ? "bg-rose-600 text-white shadow-md shadow-rose-900/40"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Expense
+              </button>
+              <button
+                type="button"
+                onClick={() => { setType("income"); setCategory("Salary"); }}
+                className={`h-10 rounded-xl text-sm font-semibold transition-all ${
+                  !isExpense
+                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-900/40"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Income
+              </button>
+            </div>
+
+            {/* Title */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
-                Transaction Title *
-              </label>
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Grocery shopping, Rent payment, Freelance gig"
-                className="w-full px-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
-                required
+                onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: undefined })); }}
+                placeholder="What did you spend on?"
+                className={`w-full h-12 px-4 bg-white/[0.04] border rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none transition ${
+                  errors.title ? "border-rose-500 focus:border-rose-400" : "border-white/[0.08] focus:border-blue-500/60"
+                }`}
               />
+              {errors.title && <p className="text-xs text-rose-400 mt-1">{errors.title}</p>}
             </div>
 
+            {/* Amount */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
-                Amount ($) *
-              </label>
-              <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">
-                  $
+              <div className={`flex items-center h-14 bg-white/[0.04] border rounded-xl overflow-hidden transition ${
+                errors.amount ? "border-rose-500" : "border-white/[0.08] focus-within:border-blue-500/60"
+              }`}>
+                <span className="px-3 text-sm font-mono font-semibold text-slate-400 border-r border-white/[0.08] h-full flex items-center min-w-[3rem] justify-center shrink-0">
+                  {currency.length <= 3 ? currency : currency.slice(0, 3)}
                 </span>
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0.01"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => { setAmount(e.target.value); if (errors.amount) setErrors((p) => ({ ...p, amount: undefined })); }}
                   placeholder="0.00"
-                  className="w-full pl-8 pr-3.5 py-2.5 bg-slate-950/80 border border-slate-800 rounded-xl text-lg font-bold text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
-                  required
+                  className="flex-1 h-full px-3 bg-transparent text-xl font-bold text-white placeholder-slate-600 focus:outline-none"
                 />
               </div>
+              {errors.amount && <p className="text-xs text-rose-400 mt-1">{errors.amount}</p>}
             </div>
-          </div>
 
-          {/* Category selection */}
-          <div>
-            <label className="block text-xs font-medium text-slate-300 mb-2">
-              Category
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-44 overflow-y-auto pr-1">
-              {availableCategories.map((c) => {
-                const Icon = c.icon;
-                const isSelected = category === c.label;
-                return (
-                  <button
-                    key={c.label}
-                    type="button"
-                    onClick={() => setCategory(c.label)}
-                    className={`flex items-center gap-2 p-2 rounded-xl border text-left text-xs font-medium transition ${
-                      isSelected
-                        ? "bg-blue-600/20 border-blue-500 text-blue-300 shadow-sm"
-                        : "bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200"
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="truncate">{c.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Date & Payment Method */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Category grid */}
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition"
-              />
+              <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Category</label>
+              <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto">
+                {availableCategories.map((c) => {
+                  const Icon = c.icon;
+                  const isSelected = category === c.label;
+                  return (
+                    <button
+                      key={c.label}
+                      type="button"
+                      onClick={() => setCategory(c.label)}
+                      className={`flex flex-col items-center gap-1 py-2.5 px-1 rounded-xl border text-center transition-all text-[11px] font-medium ${
+                        isSelected
+                          ? "bg-blue-600/20 border-blue-500/60 text-blue-300"
+                          : "bg-white/[0.03] border-white/[0.06] text-slate-400 hover:border-white/[0.12] hover:text-white active:scale-95"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      <span className="leading-tight text-center line-clamp-2">{c.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-                <CreditCard className="w-3.5 h-3.5 text-slate-400" />
-                Payment Method
-              </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition cursor-pointer"
-              >
-                {PAYMENT_METHODS.map((pm) => (
-                  <option key={pm} value={pm} className="bg-slate-900">
-                    {pm}
-                  </option>
-                ))}
-              </select>
+            {/* Date + Payment row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Date</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full h-10 px-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500/60 transition"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Payment</label>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="w-full h-10 px-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-slate-200 focus:outline-none focus:border-blue-500/60 transition cursor-pointer"
+                >
+                  {PAYMENT_METHODS.map((pm) => (
+                    <option key={pm} value={pm} className="bg-[#111827]">{pm}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
 
-          {/* Linked Note (Connects Note category to expense!) */}
-          {notesList.length > 0 && (
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                Attach / Link to Note (Optional)
-              </label>
-              <select
-                value={linkedNoteId}
-                onChange={(e) => setLinkedNoteId(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition cursor-pointer"
-              >
-                <option value="">No linked note</option>
-                {notesList.map((n) => (
-                  <option key={n._id} value={n._id} className="bg-slate-900">
-                    [{n.category}] {n.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Tags & Note remarks */}
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1 flex items-center gap-1.5">
-                <Tag className="w-3.5 h-3.5 text-slate-400" />
-                Tags (Comma separated)
-              </label>
+            {/* Notes + Tags (collapsed to save mobile space) */}
+            <div className="space-y-3">
               <input
                 type="text"
-                value={tagsInput}
-                onChange={(e) => setTagsInput(e.target.value)}
-                placeholder="e.g. food, delivery, work, tax-deductible"
-                className="w-full px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
-                Quick Remarks / Receipt Notes
-              </label>
-              <textarea
-                rows={2}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add brief memo or details..."
-                className="w-full px-3 py-2 bg-slate-950/80 border border-slate-800 rounded-xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition resize-none"
+                placeholder="Quick note (optional)"
+                className="w-full h-10 px-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition"
+              />
+              <input
+                type="text"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="Tags: food, work, tax… (comma separated)"
+                className="w-full h-10 px-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/60 transition"
               />
             </div>
+
+            {/* Linked note */}
+            {notesList.length > 0 && (
+              <div>
+                <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5 block">Link to Note</label>
+                <select
+                  value={linkedNoteId}
+                  onChange={(e) => setLinkedNoteId(e.target.value)}
+                  className="w-full h-10 px-3 bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-slate-200 focus:outline-none focus:border-indigo-500/60 transition cursor-pointer"
+                >
+                  <option value="" className="bg-[#111827]">No linked note</option>
+                  {notesList.map((n) => (
+                    <option key={n._id} value={n._id} className="bg-[#111827]">
+                      {n.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
-          {/* Footer Actions */}
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+          {/* ── Footer ── */}
+          <div className="px-5 pt-3 pb-5 mt-auto flex items-center gap-3 border-t border-white/[0.06] flex-shrink-0">
             <button
               type="button"
               onClick={onCancel}
-              disabled={isSubmitting}
-              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition"
+              disabled={saving}
+              className="h-11 flex-1 rounded-xl text-sm font-semibold text-slate-400 bg-white/[0.05] hover:bg-white/[0.08] border border-white/[0.08] transition"
             >
               Cancel
             </button>
-
             <button
               type="submit"
-              disabled={isSubmitting}
-              className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-semibold text-white shadow-lg transition disabled:opacity-50 ${
-                type === "expense"
+              disabled={saving}
+              className={`h-11 flex-1 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white shadow-lg transition-all active:scale-[0.98] disabled:opacity-60 ${
+                isExpense
                   ? "bg-rose-600 hover:bg-rose-500 shadow-rose-600/25"
                   : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/25"
               }`}
             >
-              <PlusCircle className="w-3.5 h-3.5" />
-              {isSubmitting
-                ? "Saving..."
-                : initialExpense?._id
-                ? "Update Transaction"
-                : type === "expense"
-                ? "Add Expense"
-                : "Add Income"}
+              <PlusCircle className="w-4 h-4" />
+              {saving ? "Saving…" : isEdit ? "Update" : isExpense ? "Add Expense" : "Add Income"}
             </button>
           </div>
         </form>

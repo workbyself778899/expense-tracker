@@ -24,6 +24,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { IDashboardStats } from "@/types";
+import { useCurrency } from "@/context/CurrencyContext";
 
 interface ChartsViewProps {
   stats: IDashboardStats | null;
@@ -46,6 +47,7 @@ export default function ChartsView({
   onTimeRangeChange,
   isLoading = false,
 }: ChartsViewProps) {
+  const { currency, formatAmount } = useCurrency();
   const [activeTab, setActiveTab] = useState<"all" | "trend" | "category" | "cashflow" | "payment">("all");
 
   if (isLoading) {
@@ -80,8 +82,7 @@ export default function ChartsView({
   }
 
   // Format currency tooltip
-  const formatCurrency = (val: number | string | undefined) =>
-    `$${Number(val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = (val: number | string | undefined) => formatAmount(val);
 
   return (
     <div className="space-y-6">
@@ -323,7 +324,7 @@ export default function ChartsView({
                       </span>
                     </div>
                     <div className="flex items-center gap-2 font-mono text-slate-200">
-                      <span>${cat.amount.toLocaleString()}</span>
+                      <span>{formatAmount(cat.amount)}</span>
                       <span className="text-[10px] text-slate-400 font-sans">
                         ({cat.percentage}%)
                       </span>
@@ -423,7 +424,7 @@ export default function ChartsView({
                     }}
                     formatter={(val) => [formatCurrency(Number(val)), "Total"]}
                   />
-                  <Bar dataKey="amount" name="Volume ($)" fill="#06b6d4" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="amount" name={`Volume (${currency})`} fill="#06b6d4" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

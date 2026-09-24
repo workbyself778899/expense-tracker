@@ -4,6 +4,7 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
+  currency?: string;
 }
 
 export type ExpenseCategory =
@@ -26,6 +27,7 @@ export type PaymentMethod =
   | "Cash"
   | "Credit Card"
   | "Debit Card"
+  | "e-Sewa / Wallet"
   | "Online / UPI"
   | "Bank Transfer"
   | "Crypto / Other";
